@@ -1,0 +1,686 @@
+basePath: /
+definitions:
+  domain.BookAppointmentRequest:
+    properties:
+      appointment_date:
+        type: string
+      complaint_description:
+        minLength: 5
+        type: string
+      doctor_id:
+        type: string
+      start_time:
+        type: string
+    required:
+    - appointment_date
+    - complaint_description
+    - doctor_id
+    - start_time
+    type: object
+  domain.CancelAppointmentRequest:
+    properties:
+      reason:
+        minLength: 3
+        type: string
+    required:
+    - reason
+    type: object
+  domain.CompleteAppointmentRequest:
+    properties:
+      diagnosis:
+        minLength: 3
+        type: string
+      notes:
+        type: string
+      prescription:
+        type: string
+    required:
+    - diagnosis
+    type: object
+  domain.CreateClinicRequest:
+    properties:
+      address:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      phone:
+        type: string
+    required:
+    - address
+    - name
+    - phone
+    type: object
+  domain.CreateDoctorRequest:
+    properties:
+      bio:
+        type: string
+      clinic_id:
+        type: string
+      consultation_fee:
+        minimum: 0
+        type: number
+      slot_duration_minutes:
+        maximum: 120
+        minimum: 10
+        type: integer
+      specialization:
+        maxLength: 100
+        minLength: 2
+        type: string
+      user_id:
+        type: string
+    required:
+    - clinic_id
+    - specialization
+    - user_id
+    type: object
+  domain.CreateScheduleRequest:
+    properties:
+      day_of_week:
+        maximum: 6
+        minimum: 0
+        type: integer
+      doctor_id:
+        type: string
+      end_time:
+        description: '"17:00"'
+        type: string
+      is_active:
+        type: boolean
+      start_time:
+        description: '"09:00"'
+        type: string
+    required:
+    - doctor_id
+    - end_time
+    - start_time
+    type: object
+  domain.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.RegisterRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    type: object
+  response.APIErrorResponse:
+    properties:
+      error_code:
+        type: string
+      errors: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.APIResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/response.Pagination'
+      success:
+        type: boolean
+    type: object
+  response.Pagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total_pages:
+        type: integer
+      total_records:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@clinicease.com
+    name: ClinicEase Support
+  description: Production-grade Doctor Appointment & Clinic Booking API with Zero
+    Double-Booking Guarantee.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: ClinicEase API
+  version: "1.0"
+paths:
+  /api/v1/admin/clinics:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Clinic details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateClinicRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new clinic (Admin only)
+      tags:
+      - Clinics
+  /api/v1/admin/doctors:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Doctor details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateDoctorRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a doctor profile (Admin only)
+      tags:
+      - Doctors
+  /api/v1/admin/schedules:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Schedule details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add working hours schedule for a doctor (Admin only)
+      tags:
+      - Schedules
+  /api/v1/appointments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Booking payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BookAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Book an appointment slot with atomic transaction locking (Patient only)
+      tags:
+      - Appointments
+  /api/v1/appointments/{id}:
+    get:
+      parameters:
+      - description: Appointment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get appointment details by ID
+      tags:
+      - Appointments
+  /api/v1/appointments/{id}/cancel:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Appointment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Cancellation reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CancelAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel an appointment
+      tags:
+      - Appointments
+  /api/v1/appointments/{id}/complete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Appointment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Diagnosis and prescription
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CompleteAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Complete consultation and submit medical diagnosis notes (Doctor only)
+      tags:
+      - Appointments
+  /api/v1/appointments/{id}/confirm:
+    patch:
+      parameters:
+      - description: Appointment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Confirm a pending appointment (Doctor or Admin)
+      tags:
+      - Appointments
+  /api/v1/appointments/my:
+    get:
+      parameters:
+      - description: 'Filter by status: pending, confirmed, completed, cancelled'
+        in: query
+        name: status
+        type: string
+      - description: Filter by specific date YYYY-MM-DD
+        in: query
+        name: date
+        type: string
+      - description: Filter start date range YYYY-MM-DD
+        in: query
+        name: start_date
+        type: string
+      - description: Filter end date range YYYY-MM-DD
+        in: query
+        name: end_date
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: List current user's appointments (Scoped by role with filters & pagination)
+      tags:
+      - Appointments
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      summary: Login user
+      tags:
+      - Auth
+  /api/v1/auth/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Patient registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      summary: Register a new patient
+      tags:
+      - Auth
+  /api/v1/clinics:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: List all clinics
+      tags:
+      - Clinics
+  /api/v1/clinics/{id}:
+    get:
+      parameters:
+      - description: Clinic UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      summary: Get clinic by ID
+      tags:
+      - Clinics
+  /api/v1/doctors:
+    get:
+      parameters:
+      - description: Specialization filter
+        in: query
+        name: specialization
+        type: string
+      - description: Clinic UUID
+        in: query
+        name: clinic_id
+        type: string
+      - description: Search doctor name or specialization
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Search and filter doctors with pagination
+      tags:
+      - Doctors
+  /api/v1/doctors/{id}:
+    get:
+      parameters:
+      - description: Doctor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      summary: Get doctor by ID with working schedules
+      tags:
+      - Doctors
+  /api/v1/doctors/{id}/available-slots:
+    get:
+      parameters:
+      - description: Doctor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target date format YYYY-MM-DD
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.APIErrorResponse'
+      summary: Calculate and get available appointment booking slots for a doctor
+        on a target date
+      tags:
+      - Schedules
+  /api/v1/doctors/{id}/schedules:
+    get:
+      parameters:
+      - description: Doctor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.APIResponse'
+      summary: Get all recurring working schedules for a doctor
+      tags:
+      - Schedules
+securityDefinitions:
+  BearerAuth:
+    description: 'Type "Bearer" followed by a space and JWT token. Example: "Bearer
+      eyJhbGciOi..."'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,31 @@
+/* Supplementary styles complementing Tailwind CSS v3 */
+
+/* Smooth scrollbar for tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Subtle pulse animation for connection indicator */
+@keyframes beaconPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.beacon-pulse {
+  animation: beaconPulse 2s infinite ease-in-out;
+}

@@ -1,0 +1,27 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Environment files
+.env
+
+# Test artifacts
+*.out
+coverage.html
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Temporary / Scratch
+scratch/
